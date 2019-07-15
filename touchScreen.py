@@ -6,6 +6,9 @@ from kivy.uix.popup import Popup
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
+from kivy.clock import Clock
+from kivy.properties import StringProperty, ObjectProperty
+import datetime
 
 Builder.load_string("""
 <Screen1>:
@@ -29,10 +32,13 @@ Builder.load_string("""
             color: [0,1,1,1]
             background_normal: ''
             background_color: [0, 0, 0, 0]
-            on_press: root.actionb12()
+            on_press: 
+            #    root.img_src = './internet_green.png' 
+                root.actionb12()
             opacity: 1 if self.state == 'normal' else .5
             Image:
-                source: "./internet_white.png"
+                id: b12pic
+                source: root.img_src
                 center_x: self.parent.center_x
                 center_y: self.parent.center_y
         Button:
@@ -82,7 +88,7 @@ Builder.load_string("""
                 center_x: self.parent.center_x
                 center_y: self.parent.center_y
 
-<Screen2>:
+<BlankScreen>:
     GridLayout:
         cols: 3
         spacing: [20,20]
@@ -92,54 +98,39 @@ Builder.load_string("""
             color: [1,1,1,1]
             background_normal: ''
             background_color: [0, 0, 0, 0]
-            on_press: root.actionb21()
+            on_press: root.manager.current = 'Screen1'
             opacity: 1 if self.state == 'normal' else .5
-            Image:
-                source: "./backup_white.png"
-                center_x: self.parent.center_x
-                center_y: self.parent.center_y
         Button:
             id: b22
             color: [1,1,1,1]
             background_normal: ''
             background_color: [0, 0, 0, 0]
-            on_press: root.actionb22()
+            on_press: root.manager.current = 'Screen1'
             opacity: 1 if self.state == 'normal' else .5
-            Image:
-                source: "./homeassistant_white.png"
-                center_x: self.parent.center_x
-                center_y: self.parent.center_y
         Button:
             id: b23
             color: [1,1,1,1]
             background_normal: ''
             background_color: [0, 0, 0, 0]
-            text: 'Screen 2, 3rd Action'
-            on_press: root.actionb23()
+            on_press: root.manager.current = 'Screen1'
         Button:
             id: b24
             color: [1,1,1,1]
             background_normal: ''
             background_color: [0, 0, 0, 0]
-            text: 'Screen 2, 4th Action'
-            on_press: root.actionb24()
+            on_press: root.manager.current = 'Screen1'
         Button:
             id: b25
             color: [1,1,1,1]
             background_normal: ''
             background_color: [0, 0, 0, 0]
-            text: 'Screen 2, 5th Action'
-            on_press: root.actionb25()
+            on_press: root.manager.current = 'Screen1'
         Button:
             id: b26
             color: [1,1,1,1]
             background_normal: ''
             background_color: [0, 0, 0, 0]
             on_press: root.manager.current = 'Screen1'
-            Image:
-                source: "./left_white.png"
-                center_x: self.parent.center_x
-                center_y: self.parent.center_y
 
 <RestartHAPopup>:
     title: ""                 
@@ -291,6 +282,7 @@ Builder.load_string("""
 
 """)
 
+
 class RestartFritzBoxPopup(Popup):
     def actionrestartfritzbox_yes(self):
         print("restart fritzbox!!!")
@@ -300,6 +292,8 @@ class RestartFritzBoxPopup(Popup):
 class BeeperOffPopup(Popup):
     def actionbeeperoff_yes(self):
         print("beeper off!!!")
+        print(lastactiontimestamp)
+        
         os.system('/home/pi/touchScreen/scripts/beep_off.sh')
     pass
 
@@ -323,54 +317,93 @@ class RestartHAPopup(Popup):
 
 # Declare both screens
 class Screen1(Screen):
+    global lastactiontimestamp
+    img_src = StringProperty('./internet_red.png')
     def actionb11(self):
         print("action b11 - restart HA")
+        lastactiontimestamp = datetime.datetime.now() 
         p = RestartHAPopup()
         p.open()
     def actionb12(self):
+        lastactiontimestamp = datetime.datetime.now() 
         print("action b12")
     def actionb13(self):
+        lastactiontimestamp = datetime.datetime.now() 
         print("action b13 - beeper off")
         p = BeeperOffPopup()
         p.open()
     def actionb14(self):
+        lastactiontimestamp = datetime.datetime.now() 
         print("action b14 - reboot")
         p = RebootPopup()
         p.open()
     def actionb15(self):
+        lastactiontimestamp = datetime.datetime.now() 
         print("action b14 - shutdown")
         p = ShutdownPopup()
         p.open()
     def actionb16(self):
+        lastactiontimestamp = datetime.datetime.now() 
         print("action b16 - restart fritzbox")
         p = RestartFritzBoxPopup()
         p.open()
     pass
 
-class Screen2(Screen):
+class BlankScreen(Screen):
+    global lastactiontimestamp
     def actionb21(self):
         print("action b21")
+        lastactiontimestamp = datetime.datetime.now() 
     def actionb22(self):
+        lastactiontimestamp = datetime.datetime.now() 
         print("action b22")
     def actionb23(self):
         print("action b23")
+        lastactiontimestamp = datetime.datetime.now() 
     def actionb24(self):
         print("action b24")
+        lastactiontimestamp = datetime.datetime.now() 
     def actionb25(self):
         print("action b25")
+        lastactiontimestamp = datetime.datetime.now() 
     pass
 
 # Create the screen manager
-sm = ScreenManager(transition=FadeTransition())
+lastactiontimestamp = datetime.datetime.now()
 
+sm = ScreenManager()
 sm.add_widget(Screen1(name='Screen1'))
-sm.add_widget(Screen2(name='Screen2'))
+sm.add_widget(BlankScreen(name='BlankScreen'))
+
+
 
 class ScreenApp(App):
     def build(self):
         return sm
+    def timer_checkInternet(dt):
+        #print("timer - check Internet")
+        result = subprocess.run(['/home/pi/touchScreen/scripts/checkInternet.sh', ''], stdout=subprocess.PIPE)
+        if int(result.stdout.decode('utf-8')) == 1:
+            #print("OK")
+            sm.get_screen('Screen1').ids['b12pic'].source = './internet_green.png'
+        else:
+            print("FAILD")    
+            sm.get_screen('Screen1').ids['b12pic'].source = './internet_red.png'
+        pass    
+    def timer_checkInactivity(dt):
+        global lastactiontimestamp
+        nowtime = datetime.datetime.now()
+        if ((nowtime - datetime.timedelta(seconds=10)) > lastactiontimestamp):
+            print("timer - ScreenSaver - On")
+            lastactiontimestamp = nowtime
+            sm.current = "BlankScreen"
+        pass    
 
 if __name__ == '__main__':
+    global lastactiontimestamp
+    lastactiontimestamp = datetime.datetime.now()
     print("Start...")
+    Clock.schedule_interval(ScreenApp.timer_checkInternet, 5)
+    Clock.schedule_interval(ScreenApp.timer_checkInactivity, 10)
     ScreenApp().run()
     
