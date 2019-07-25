@@ -13,9 +13,9 @@ import datetime
 Builder.load_string("""
 <Screen1>:
     GridLayout:
-        cols: 3
-        spacing: [20,20]
-        padding: [20,20]
+        cols: 4
+        spacing: [10,10]
+        padding: [10,10]
         Button:
             id: b11
             color: [0,1,1,1]
@@ -87,10 +87,32 @@ Builder.load_string("""
                 source: "./router_white.png"
                 center_x: self.parent.center_x
                 center_y: self.parent.center_y
+        Button:
+            id: b17
+            color: [0,1,1,1]
+            background_normal: ''
+            background_color: [0, 0, 0, 0]
+            on_press: root.actionb17()
+            opacity: 1 if self.state == 'normal' else .5
+            Image:
+                source: "./iRobot_start_white.png"
+                center_x: self.parent.center_x
+                center_y: self.parent.center_y
+        Button:
+            id: b18
+            color: [0,1,1,1]
+            background_normal: ''
+            background_color: [0, 0, 0, 0]
+            on_press: root.actionb18()
+            opacity: 1 if self.state == 'normal' else .5
+            Image:
+                source: "./iRobot_stop_white.png"
+                center_x: self.parent.center_x
+                center_y: self.parent.center_y
 
 <BlankScreen>:
     GridLayout:
-        cols: 3
+        cols: 4
         spacing: [20,20]
         padding: [20,20]
         Button:
@@ -127,6 +149,18 @@ Builder.load_string("""
             on_press: root.manager.current = 'Screen1'
         Button:
             id: b26
+            color: [1,1,1,1]
+            background_normal: ''
+            background_color: [0, 0, 0, 0]
+            on_press: root.manager.current = 'Screen1'
+        Button:
+            id: b27
+            color: [1,1,1,1]
+            background_normal: ''
+            background_color: [0, 0, 0, 0]
+            on_press: root.manager.current = 'Screen1'
+        Button:
+            id: b28
             color: [1,1,1,1]
             background_normal: ''
             background_color: [0, 0, 0, 0]
@@ -280,6 +314,67 @@ Builder.load_string("""
                 opacity: 1 if self.state == 'normal' else .5
                 on_press: root.dismiss()
 
+<StartiRobotPopup>:
+    title: ""                 # <<<<<<<<
+    separator_height: 0       # <<<<<<<<
+    size_hint: None, None
+    size: 600, 300
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "Start iRobot?"
+            font_size: '35sp'
+        BoxLayout: 
+            size_hint_y: 0.3   
+            Button:
+                id: reboot_yes
+                text: "Yes"
+                font_size: '35sp'
+                background_normal: ''
+                background_color: [0, 0, 0, 0]
+                opacity: 1 if self.state == 'normal' else .5
+                on_press: 
+                    root.actionstartirobot_yes()
+                    root.dismiss()
+            Button:
+                text: "No"
+                font_size: '35sp'
+                background_normal: ''
+                background_color: [0, 0, 0, 0]
+                opacity: 1 if self.state == 'normal' else .5
+                on_press: root.dismiss()
+
+<DockiRobotPopup>:
+    title: ""                 # <<<<<<<<
+    separator_height: 0       # <<<<<<<<
+    size_hint: None, None
+    size: 600, 300
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "Dock iRobot?"
+            font_size: '35sp'
+        BoxLayout: 
+            size_hint_y: 0.3   
+            Button:
+                id: reboot_yes
+                text: "Yes"
+                font_size: '35sp'
+                background_normal: ''
+                background_color: [0, 0, 0, 0]
+                opacity: 1 if self.state == 'normal' else .5
+                on_press: 
+                    root.actiondockirobot_yes()
+                    root.dismiss()
+            Button:
+                text: "No"
+                font_size: '35sp'
+                background_normal: ''
+                background_color: [0, 0, 0, 0]
+                opacity: 1 if self.state == 'normal' else .5
+                on_press: root.dismiss()
+
+
 """)
 
 
@@ -293,7 +388,6 @@ class BeeperOffPopup(Popup):
     def actionbeeperoff_yes(self):
         print("beeper off!!!")
         print(lastactiontimestamp)
-        
         os.system('/home/pi/touchScreen/scripts/beep_off.sh')
     pass
 
@@ -313,6 +407,18 @@ class RestartHAPopup(Popup):
     def actionrestartHA_yes(self):
         print("restart HA!!!")
         os.system('/home/pi/touchScreen/scripts/homeassistant_restart.sh')
+    pass
+
+class StartiRobotPopup(Popup):
+    def actionstartirobot_yes(self):
+        print("start irobot!!!")
+        os.system('/home/pi/touchScreen/scripts/startRoomba.sh')
+    pass
+
+class DockiRobotPopup(Popup):
+    def actiondockirobot_yes(self):
+        print("dock irobot!!!")
+        os.system('/home/pi/touchScreen/scripts/dockRoomba.sh')
     pass
 
 # Declare both screens
@@ -346,6 +452,16 @@ class Screen1(Screen):
         lastactiontimestamp = datetime.datetime.now() 
         print("action b16 - restart fritzbox")
         p = RestartFritzBoxPopup()
+        p.open()
+    def actionb17(self):
+        lastactiontimestamp = datetime.datetime.now() 
+        print("action b17 - start iRobot")
+        p = StartiRobotPopup()
+        p.open()
+    def actionb18(self):
+        lastactiontimestamp = datetime.datetime.now() 
+        print("action b18 - dock iRobot")
+        p = DockiRobotPopup()
         p.open()
     pass
 
@@ -403,7 +519,7 @@ if __name__ == '__main__':
     global lastactiontimestamp
     lastactiontimestamp = datetime.datetime.now()
     print("Start...")
-    Clock.schedule_interval(ScreenApp.timer_checkInternet, 5)
-    Clock.schedule_interval(ScreenApp.timer_checkInactivity, 10)
+    Clock.schedule_interval(ScreenApp.timer_checkInternet, 10)
+    Clock.schedule_interval(ScreenApp.timer_checkInactivity, 30)
     ScreenApp().run()
     
