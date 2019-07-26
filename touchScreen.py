@@ -381,44 +381,44 @@ Builder.load_string("""
 class RestartFritzBoxPopup(Popup):
     def actionrestartfritzbox_yes(self):
         print("restart fritzbox!!!")
-        os.system('/home/pi/touchScreen/scripts/fritzbox_restart.sh')
+        os.system('/home/pi/bin/ts/fritzbox_restart.sh')
     pass
 
 class BeeperOffPopup(Popup):
     def actionbeeperoff_yes(self):
         print("beeper off!!!")
         print(lastactiontimestamp)
-        os.system('/home/pi/touchScreen/scripts/beep_off.sh')
+        os.system('/home/pi/bin/ts/beep_off.sh')
     pass
 
 class RebootPopup(Popup):
     def actionreboot_yes(self):
         print("reboot!!!")
-        os.system('/home/pi/touchScreen/scripts/reboot.sh')
+        os.system('/home/pi/bin/ts/reboot.sh')
     pass
 
 class ShutdownPopup(Popup):
     def actionshutdown_yes(self):
         print("shutdown!!!")
-        os.system('/home/pi/touchScreen/scripts/poweroff.sh')
+        os.system('/home/pi/bin/ts/poweroff.sh')
     pass
 
 class RestartHAPopup(Popup):
     def actionrestartHA_yes(self):
         print("restart HA!!!")
-        os.system('/home/pi/touchScreen/scripts/homeassistant_restart.sh')
+        os.system('/home/pi/bin/ts/homeassistant_restart.sh')
     pass
 
 class StartiRobotPopup(Popup):
     def actionstartirobot_yes(self):
         print("start irobot!!!")
-        os.system('/home/pi/touchScreen/scripts/startRoomba.sh')
+        os.system('/home/pi/bin/ts/startRoomba.sh')
     pass
 
 class DockiRobotPopup(Popup):
     def actiondockirobot_yes(self):
         print("dock irobot!!!")
-        os.system('/home/pi/touchScreen/scripts/dockRoomba.sh')
+        os.system('/home/pi/bin/ts/dockRoomba.sh')
     pass
 
 # Declare both screens
@@ -498,7 +498,7 @@ class ScreenApp(App):
         return sm
     def timer_checkInternet(dt):
         #print("timer - check Internet")
-        result = subprocess.run(['/home/pi/touchScreen/scripts/checkInternet.sh', ''], stdout=subprocess.PIPE)
+        result = subprocess.run(['/home/pi/bin/ts/checkInternet.sh', ''], stdout=subprocess.PIPE)
         if int(result.stdout.decode('utf-8')) == 1:
             #print("OK")
             sm.get_screen('Screen1').ids['b12pic'].source = './internet_green.png'
